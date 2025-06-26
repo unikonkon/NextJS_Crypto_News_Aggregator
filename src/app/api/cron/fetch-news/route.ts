@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import { newsAggregator, NEWS_SOURCES } from '@/lib/rss-parser'
 import { geminiAnalyzer } from '@/lib/gemini'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+
+// Server-side client with service role key
+const supabaseAdmin = createClient(
+  supabaseUrl,
+  supabaseServiceRoleKey
+)
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const sourceName = searchParams.get('source')
-    
+
     console.log('Starting news fetch job...', sourceName ? `for ${sourceName}` : 'for all sources')
-    
+
     let sourcesToFetch = NEWS_SOURCES.filter(s => s.enabled)
-    
+
     // If specific source is requested, filter to that source only
     if (sourceName && sourceName !== 'all') {
       sourcesToFetch = NEWS_SOURCES.filter(s => s.name === sourceName && s.enabled)
@@ -19,21 +28,21 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Source not found or disabled' }, { status: 404 })
       }
     }
-    
+
     let totalProcessed = 0
     let totalNew = 0
     const results = []
 
     for (const source of sourcesToFetch) {
       console.log(`Fetching from ${source.name}...`)
-      
+
       try {
         const articles = await newsAggregator.fetchFromSource(source)
         console.log(`Processing ${articles.length} articles from ${source.name}`)
-        
+
         let sourceProcessed = 0
         let sourceNew = 0
-        
+
         for (const article of articles) {
           if (!article.title || !article.link) continue
 
@@ -95,20 +104,20 @@ export async function GET(request: NextRequest) {
           }
 
           sourceProcessed++
-          
+
           // Add small delay to avoid overwhelming the system
           await new Promise(resolve => setTimeout(resolve, 500))
         }
-        
+
         totalProcessed += sourceProcessed
         totalNew += sourceNew
-        
+
         results.push({
           source: source.name,
           processed: sourceProcessed,
           new: sourceNew
         })
-        
+
       } catch (error) {
         console.error(`Error processing ${source.name}:`, error)
         results.push({
