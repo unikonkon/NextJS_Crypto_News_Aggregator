@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser, AuthData } from '@/lib/auth'
 import NeonHeader from '@/components/NeonHeader'
-import NavigationButtons from '@/components/NavigationButtons'
 
 export default function DashboardPage() {
     const [user, setUser] = useState<AuthData | null>(null)
@@ -121,8 +120,6 @@ export default function DashboardPage() {
                
             </div>
             
-            {/* Navigation Buttons */}
-            {/* <NavigationButtons /> */}
         </div>
     )
 } 

@@ -1,8 +1,6 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { isAuthenticated } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, BarChart3, Sparkles, ArrowRight } from 'lucide-react'
@@ -10,13 +8,6 @@ import NeonHeader from '@/components/NeonHeader'
 
 export default function HomePage() {
   const router = useRouter()
-
-  // // Auto-redirect ถ้าเข้าสู่ระบบแล้ว
-  // useEffect(() => {
-  //   if (isAuthenticated()) {
-  //     router.push('/home')
-  //   }
-  // }, [router])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">

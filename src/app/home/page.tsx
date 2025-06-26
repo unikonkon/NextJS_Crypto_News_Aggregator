@@ -5,7 +5,6 @@ import { Article } from '@/lib/supabase'
 import NewsCard from '@/components/NewsCard'
 import FeedList from '@/components/FeedList'
 import NeonHeader from '@/components/NeonHeader'
-import NavigationButtons from '@/components/NavigationButtons'
 import { Loader2, TrendingUp, Zap, BarChart3, Download, RefreshCw, Sparkles, Terminal, Wifi, Activity } from 'lucide-react'
 import { AuthData, getCurrentUser } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
@@ -460,8 +459,6 @@ export default function Home() {
 
             </main>
 
-            {/* Navigation Buttons */}
-            {/* <NavigationButtons /> */}
         </div>
     )
 }
