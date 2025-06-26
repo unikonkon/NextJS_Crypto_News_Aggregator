@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Add pagination
     query = query.range(offset, offset + limit - 1)
 
-    const { data: articles, error, count } = await query
+    const { data: articles, error } = await query
 
     if (error) {
       console.error('Error fetching articles:', error)

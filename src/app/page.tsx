@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Article } from '@/lib/supabase'
 import ArticleCard from '@/components/ArticleCard'
 import ArticleFilters from '@/components/ArticleFilters'
@@ -51,7 +51,7 @@ export default function Home() {
   const [order, setOrder] = useState('desc')
   const [page, setPage] = useState(1)
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async () => {
     setLoading(true)
     setError(null)
     
@@ -79,7 +79,7 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, sentiment, source, sortBy, order])
 
   const fetchNewsFromSource = async (sourceName: string) => {
     setFetchingNews(sourceName)
@@ -137,7 +137,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchArticles()
-  }, [sentiment, source, sortBy, order, page])
+  }, [fetchArticles])
 
   const handleRefresh = () => {
     setPage(1)
