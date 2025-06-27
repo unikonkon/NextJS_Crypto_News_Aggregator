@@ -341,7 +341,7 @@ export default function Home() {
                         <div className="glass-card bg-green-500/10 border-green-400/30 rounded-lg p-4">
                             <h3 className="text-green-300 font-semibold mb-2 flex items-center gap-2">
                                 <Sparkles className="h-4 w-4" />
-                                ผลการดึงข่าว
+                                ผลการดึงข่าว ของวันนี้
                             </h3>
                             <p className="text-green-200 mb-3">
                                 ✅ ดึงได้: <span className="font-bold">{fetchResults.processed}</span> ข่าว |

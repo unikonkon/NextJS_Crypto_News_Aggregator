@@ -83,8 +83,8 @@ body {
 .glass-card:hover {
   background: var(--card-hover);
   border-color: var(--neon-cyan);
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+  transform: translateY(-0.2px);
+  transition: all 0.1s ease;
 }
 
 /* Gradient Text */
@@ -113,6 +113,19 @@ body {
 .neon-button:hover {
   background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(183, 148, 246, 0.2) 100%);
   box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+  transform: scale(1.02);
+}
+
+.neon-button-secondary {
+  background: linear-gradient(135deg, rgba(183, 148, 246, 0.1) 0%, rgba(0, 255, 136, 0.1) 100%);
+  border: 1px solid var(--neon-purple);
+  color: var(--neon-purple);
+  transition: all 0.3s ease;
+}
+
+.neon-button-secondary:hover {
+  background: linear-gradient(135deg, rgba(183, 148, 246, 0.2) 0%, rgba(0, 255, 136, 0.2) 100%);
+  box-shadow: 0 0 20px rgba(183, 148, 246, 0.4);
   transform: scale(1.02);
 }
 

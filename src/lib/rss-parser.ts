@@ -1,4 +1,6 @@
 import Parser from 'rss-parser'
+import * as xml2js from 'xml2js'
+import * as cheerio from 'cheerio'
 
 interface RSSFeed {
   title?: string
@@ -7,6 +9,8 @@ interface RSSFeed {
   pubDate?: string
   content?: string
   contentSnippet?: string
+  author?: string
+  category?: string
 }
 
 export interface NewsSource {
@@ -105,15 +109,87 @@ export class NewsAggregator {
   async fetchFromSource(source: NewsSource): Promise<RSSFeed[]> {
     try {
       console.log(`Fetching from ${source.name}...`)
+      
+      // First, get the raw XML
+      const response = await fetch(source.url)
+      const xmlData = await response.text()
+      
+      // Parse XML with xml2js to get content:encoded
+      const parser = new xml2js.Parser()
+      const xmlResult = await parser.parseStringPromise(xmlData)
+      
+      // Also use rss-parser for standard fields
       const feed = await this.parser.parseURL(source.url)
       
-      return feed.items.map(item => ({
-        title: item.title || '',
-        link: item.link || '',
-        description: item.contentSnippet || item.description || '',
-        pubDate: item.pubDate || new Date().toISOString(),
-        content: item.content || item.contentSnippet || item.description || ''
-      }))
+      return feed.items.map((item, index) => {
+        let content = ''
+        let author = ''
+        let category = ''
+        
+        // Extract content:encoded from XML if available
+        const xmlItem = xmlResult?.rss?.channel?.[0]?.item?.[index]
+        
+        if (xmlItem?.['content:encoded']) {
+          // Extract HTML content and convert to text using cheerio
+          const htmlContent = xmlItem['content:encoded'][0]
+          const $ = cheerio.load(htmlContent)
+          content = $.text().trim()
+        } else {
+          // Fallback to description if no content:encoded
+          content = item.contentSnippet || item.description || ''
+        }
+        
+        // Handle different source formats
+        switch (source.name) {
+          case 'CoinDesk':
+            // CoinDesk: title, link, pubDate, guid, description, media:content
+            break
+            
+          case 'Cointelegraph':
+            // Cointelegraph: title, link, pubDate, guid, description
+            break
+            
+          case 'CoinGape':
+            // CoinGape: dc:creator, category, content:encoded
+            if (xmlItem?.['dc:creator']) {
+              author = xmlItem['dc:creator'][0]
+            }
+            if (xmlItem?.category) {
+              category = Array.isArray(xmlItem.category) ? xmlItem.category.join(', ') : xmlItem.category
+            }
+            break
+            
+          case 'Bitcoin Magazine':
+            // Bitcoin Magazine: author, category, content:encoded
+            if (item.author) {
+              author = item.author
+            }
+            if (xmlItem?.category) {
+              category = Array.isArray(xmlItem.category) ? xmlItem.category.join(', ') : xmlItem.category
+            }
+            break
+            
+          case 'CryptoSlate':
+            // CryptoSlate: dc:creator, category, content:encoded
+            if (xmlItem?.['dc:creator']) {
+              author = xmlItem['dc:creator'][0]
+            }
+            if (xmlItem?.category) {
+              category = Array.isArray(xmlItem.category) ? xmlItem.category.join(', ') : xmlItem.category
+            }
+            break
+        }
+        
+        return {
+          title: item.title || '',
+          link: item.link || '',
+          description: item.contentSnippet || item.description || '',
+          pubDate: item.pubDate || new Date().toISOString(),
+          content: content,
+          author: author,
+          category: category
+        }
+      })
     } catch (error) {
       console.error(`Error fetching from ${source.name}:`, error)
       return []

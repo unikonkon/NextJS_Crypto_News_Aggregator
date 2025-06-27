@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, Sparkles, Zap } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import AuthButton from '@/components/AuthButton'
 
 interface NeonHeaderProps {
@@ -38,10 +38,10 @@ export default function NeonHeader({
               <TrendingUp className={`text-cyan-400 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-8 w-8'}`} />
             </div>
             <div>
-              <h1 className={`header-title gradient-text font-bold mb-1 transition-all duration-300 ${isScrolled ? 'scrolled text-xl' : 'text-3xl'}`}>
+              <h1 className={`sm:flex hidden header-title gradient-text font-bold mb-1 transition-all duration-300 ${isScrolled ? 'scrolled text-xl' : 'text-3xl'}`}>
                 {title}
               </h1>
-              <p className={`header-subtitle text-gray-400 text-sm transition-all duration-300 ${isScrolled ? 'scrolled' : ''}`}>
+              <p className={`sm:flex hidden header-subtitle text-gray-400 text-sm transition-all duration-300 ${isScrolled ? 'scrolled' : ''}`}>
                 {subtitle}
               </p>
             </div>
@@ -50,14 +50,14 @@ export default function NeonHeader({
           <div className={`header-stats flex items-center gap-6 ${isScrolled ? 'scrolled' : ''}`}>
             {showStats && (
               <>
-                <div className="hidden md:flex items-center gap-2 text-sm">
+                {/* <div className="hidden md:flex items-center gap-2 text-sm">
                   <Sparkles className={`text-cyan-400 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
                   <span className="text-gray-300">Live Analytics</span>
                 </div>
                 <div className="hidden md:flex items-center gap-2 text-sm">
                   <Zap className={`text-purple-400 transition-all duration-300 ${isScrolled ? 'h-6 w-6' : 'h-9 w-9'}`} />
                   <span className="text-gray-300">AI Powered</span>
-                </div>
+                </div> */}
               </>
             )}
             <AuthButton />

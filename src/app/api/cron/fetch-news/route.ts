@@ -76,9 +76,9 @@ export async function GET(request: NextRequest) {
               description: article.description || null,
               source: source.name,
               pub_date: article.pubDate ? new Date(article.pubDate).toISOString() : null,
-              category: null, // Will be set by AI later if needed
+              category: article.category || null, // RSS category from feed
               name_category: nameCategory, // เก็บชื่อเหรียญคริปโต
-              creator: null // Can be extracted from RSS if available
+              creator: article.author || null // Author from RSS feed
             })
 
           if (error) {
