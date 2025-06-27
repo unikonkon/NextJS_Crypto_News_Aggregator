@@ -43,6 +43,51 @@ export const NEWS_SOURCES: NewsSource[] = [
   }
 ]
 
+// Function to extract crypto mentions from title
+export const extractCryptoTags = (title: string): string[] => {
+  const cryptoKeywords = [
+    'BTC', 'Bitcoin', 'ETH', 'Ethereum', 'ADA', 'Cardano', 
+    'SOL', 'Solana', 'DOGE', 'Dogecoin', 'XRP', 'Ripple',
+    'DOT', 'Polkadot', 'MATIC', 'Polygon', 'AVAX', 'Avalanche',
+    'LINK', 'Chainlink', 'UNI', 'Uniswap', 'LTC', 'Litecoin',
+    'AI16Z', 'HYPE', 'MOVE', 'BIO', 'VINE', 'ONDO', 'XLM', 'Stellar',
+    'AIXBT', 'PNUT', 'SUSHI', 'BAT', 'WIF', 'EIGEN', 'RENDER', 'MORPHO',
+    'TRX', 'TRON', 'OP', 'Optimism', 'LDO', 'Lido', 'KSM', 'Kusama',
+    'SUI', 'ARB', 'Arbitrum', 'NEAR', 'WLD', 'Worldcoin', 'PYTH', 'TON'
+  ]
+  
+  const tags: string[] = []
+  const upperTitle = title.toUpperCase()
+  
+  cryptoKeywords.forEach(keyword => {
+    if (upperTitle.includes(keyword.toUpperCase())) {
+      // Add short version for common coins
+      if (keyword === 'Bitcoin') tags.push('BTC')
+      else if (keyword === 'Ethereum') tags.push('ETH')
+      else if (keyword === 'Cardano') tags.push('ADA')
+      else if (keyword === 'Solana') tags.push('SOL')
+      else if (keyword === 'Dogecoin') tags.push('DOGE')
+      else if (keyword === 'Ripple') tags.push('XRP')
+      else if (keyword === 'Polkadot') tags.push('DOT')
+      else if (keyword === 'Polygon') tags.push('MATIC')
+      else if (keyword === 'Avalanche') tags.push('AVAX')
+      else if (keyword === 'Chainlink') tags.push('LINK')
+      else if (keyword === 'Uniswap') tags.push('UNI')
+      else if (keyword === 'Litecoin') tags.push('LTC')
+      else if (keyword === 'Stellar') tags.push('XLM')
+      else if (keyword === 'TRON') tags.push('TRX')
+      else if (keyword === 'Optimism') tags.push('OP')
+      else if (keyword === 'Lido') tags.push('LDO')
+      else if (keyword === 'Kusama') tags.push('KSM')
+      else if (keyword === 'Arbitrum') tags.push('ARB')
+      else if (keyword === 'Worldcoin') tags.push('WLD')
+      else if (keyword.length <= 6) tags.push(keyword)
+    }
+  })
+  
+  return [...new Set(tags)].slice(0, 3) // Remove duplicates and limit to 3
+}
+
 export class NewsAggregator {
   private parser: Parser
 

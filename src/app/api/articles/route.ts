@@ -4,11 +4,40 @@ import { supabase } from '@/lib/supabase'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const action = searchParams.get('action')
+    
+    // Handle get categories action
+    if (action === 'categories') {
+      const { data: articles, error } = await supabase
+        .from('articles')
+        .select('name_category')
+        .not('name_category', 'is', null)
+      
+      if (error) {
+        console.error('Error fetching categories:', error)
+        return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 })
+      }
+      
+      // Extract all unique crypto tags from name_category
+      const allTags = new Set<string>()
+      articles.forEach((article: { name_category: string }) => {
+        if (article.name_category) {
+          const tags = article.name_category.split(',').map((tag: string) => tag.trim())
+          tags.forEach((tag: string) => allTags.add(tag))
+        }
+      })
+      
+      return NextResponse.json({
+        categories: Array.from(allTags).sort()
+      })
+    }
+    
+    // Handle regular article fetching
     const page = parseInt(searchParams.get('page') || '1')
     const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100)
-    const sentiment = searchParams.get('sentiment')
     const source = searchParams.get('source')
-    const sortBy = searchParams.get('sortBy') || 'trending_score'
+    const nameCategory = searchParams.get('name_category')
+    const sortBy = searchParams.get('sortBy') || 'created_at'
     const order = searchParams.get('order') || 'desc'
 
     const offset = (page - 1) * limit
@@ -18,12 +47,16 @@ export async function GET(request: NextRequest) {
       .select('*')
 
     // Add filters
-    if (sentiment && sentiment !== 'all') {
-      query = query.eq('sentiment', sentiment)
-    }
-
     if (source && source !== 'all') {
       query = query.eq('source', source)
+    }
+
+    if (nameCategory && nameCategory !== 'all') {
+      if (nameCategory === 'others') {
+        query = query.is('name_category', null)
+      } else {
+        query = query.like('name_category', `%${nameCategory}%`)
+      }
     }
 
     // Add sorting
@@ -40,9 +73,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count for pagination
-    const { count: totalCount } = await supabase
+    let countQuery = supabase
       .from('articles')
       .select('*', { count: 'exact', head: true })
+
+    // Apply same filters for count
+    if (source && source !== 'all') {
+      countQuery = countQuery.eq('source', source)
+    }
+
+    if (nameCategory && nameCategory !== 'all') {
+      if (nameCategory === 'others') {
+        countQuery = countQuery.is('name_category', null)
+      } else {
+        countQuery = countQuery.like('name_category', `%${nameCategory}%`)
+      }
+    }
+
+    const { count: totalCount } = await countQuery
 
     return NextResponse.json({
       articles: articles || [],
@@ -63,7 +111,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, url, content, source, published_at } = body
+    const { title, url, content, description, source, pub_date, category, name_category, creator } = body
 
     if (!title || !url || !content || !source) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -86,8 +134,12 @@ export async function POST(request: NextRequest) {
         title,
         url,
         content,
+        description: description || null,
         source,
-        published_at: published_at || new Date().toISOString()
+        pub_date: pub_date || null,
+        category: category || null,
+        name_category: name_category || null,
+        creator: creator || null
       })
       .select()
       .single()

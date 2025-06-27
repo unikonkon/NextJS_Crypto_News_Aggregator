@@ -52,13 +52,18 @@ export default function Home() {
     const [user, setUser] = useState<AuthData | null>(null)
     const router = useRouter()
 
-    // Filter states
-    const [sentiment, setSentiment] = useState('all')
+    // Filter states - แยกเป็น active (ที่ใช้จริง) และ pending (รอกดปุ่ม)
     const [source, setSource] = useState('all')
-    const [sortBy, setSortBy] = useState('trending_score')
+    const [nameCategory, setNameCategory] = useState('all') // สำหรับ tabs - แสดงผลทันที
+    const [sortBy, setSortBy] = useState('created_at')
     const [order, setOrder] = useState('desc')
     const [page, setPage] = useState(1)
     const [limit, setLimit] = useState(100)
+    
+    // Pending states สำหรับ filters ที่รอกดปุ่มแสดงผล
+    const [pendingSource, setPendingSource] = useState('all')
+    const [pendingSortBy, setPendingSortBy] = useState('created_at')
+    const [pendingOrder, setPendingOrder] = useState('desc')
 
     useEffect(() => {
         const userData = getCurrentUser()
@@ -80,8 +85,8 @@ export default function Home() {
             const params = new URLSearchParams({
                 page: page.toString(),
                 limit: limit.toString(),
-                sentiment: sentiment !== 'all' ? sentiment : '',
                 source: source !== 'all' ? source : '',
+                name_category: nameCategory !== 'all' ? nameCategory : '', // ใช้ nameCategory สำหรับ tabs
                 sortBy,
                 order
             })
@@ -100,7 +105,7 @@ export default function Home() {
         } finally {
             setArticlesLoading(false)
         }
-    }, [page, sentiment, source, sortBy, order, limit])
+    }, [page, source, nameCategory, sortBy, order, limit]) // ใช้ active states
 
     const fetchNewsFromSource = async (sourceName: string) => {
         setFetchingNews(sourceName)
@@ -165,6 +170,21 @@ export default function Home() {
         fetchArticles()
     }
 
+    // Function สำหรับการกดปุ่มแสดงผล - apply pending states
+    const handleShowResults = () => {
+        setSource(pendingSource)
+        setSortBy(pendingSortBy)
+        setOrder(pendingOrder)
+        setPage(1) // รีเซ็ต page เป็น 1
+        // fetchArticles จะถูกเรียกโดยอัตโนมัติจาก useEffect
+    }
+
+    // Function สำหรับการเปลี่ยน tabs - แสดงผลทันที
+    const handleNameCategoryChange = (value: string) => {
+        setNameCategory(value)
+        setPage(1) // รีเซ็ต page เป็น 1
+        // fetchArticles จะถูกเรียกโดยอัตโนมัติจาก useEffect
+    }
 
     if (!user) {
         return null // ไม่ render อะไร รอ useEffect redirect
@@ -250,7 +270,7 @@ export default function Home() {
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <Sparkles className="h-3 w-3 text-orange-400" />
-                                        <span>AI Analysis: Standby</span>
+                                        <span>Raw Data Mode</span>
                                     </div>
                                 </div>
                             </div>
@@ -346,15 +366,19 @@ export default function Home() {
 
                 {/* Feed List (Filters) */}
                 <FeedList
-                    sentiment={sentiment}
                     source={source}
+                    nameCategory={nameCategory}
                     sortBy={sortBy}
                     order={order}
-                    onSentimentChange={setSentiment}
-                    onSourceChange={setSource}
-                    onSortByChange={setSortBy}
-                    onOrderChange={setOrder}
+                    pendingSource={pendingSource}
+                    pendingSortBy={pendingSortBy}
+                    pendingOrder={pendingOrder}
+                    onNameCategoryChange={handleNameCategoryChange} // แสดงผลทันที
+                    onPendingSourceChange={setPendingSource} // รอกดปุ่ม
+                    onPendingSortByChange={setPendingSortBy} // รอกดปุ่ม
+                    onPendingOrderChange={setPendingOrder} // รอกดปุ่ม
                     onRefresh={handleRefresh}
+                    onShowResults={handleShowResults} // กดปุ่มแสดงผล
                 />
 
                 {/* Error State */}
@@ -367,8 +391,26 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* Neon Stats Dashboard */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-1 mb-8">
+                {/* AI Processing Link */}
+                <div className="glass-card neon-border rounded-xl mb-8 p-6 text-center">
+                    <h3 className="gradient-text text-xl font-semibold mb-4 flex items-center justify-center gap-3">
+                        <Sparkles className="h-6 w-6" />
+                        AI News Analysis
+                    </h3>
+                    <p className="text-gray-400 mb-4">
+                        ต้องการให้ AI วิเคราะห์ข่าว? ไปหน้าประมวลผล AI เพื่อเลือกข่าวและวิเคราะห์
+                    </p>
+                    <button
+                        onClick={() => router.push('/ai-analysis')}
+                        className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
+                    >
+                        <Sparkles className="h-4 w-4" />
+                        ไปหน้า AI Analysis
+                    </button>
+                </div>
+
+                {/* Simple Stats Dashboard */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-1 mb-8">
                     <div className="glass-card bg-cyan-500/10 border-cyan-400/30 rounded-xl py-2 text-center neon-glow-hover group">
                         <div className="text-cyan-300 text-3xl font-bold mb-2">
                             {articles.length}
@@ -390,74 +432,65 @@ export default function Home() {
                                     แก้ไข
                                 </button>
                             </div>
-
                         </div>
                     </div>
 
                     <div className="glass-card bg-green-500/10 border-green-400/30 rounded-xl py-2 text-center neon-glow-hover">
                         <div className="text-green-300 text-3xl font-bold mb-2">
-                            {articles.filter(a => (a.trending_score || 0) >= 70).length}
+                            {new Set(articles.map(a => a.source)).size}
                         </div>
                         <div className="text-gray-400 text-sm flex items-center justify-center gap-1">
                             <TrendingUp className="h-4 w-4" />
-                            ข่าวเทรนด์
+                            แหล่งข่าว
                         </div>
                     </div>
 
                     <div className="glass-card bg-purple-500/10 border-purple-400/30 rounded-xl py-2 text-center neon-glow-hover">
                         <div className="text-purple-300 text-3xl font-bold mb-2">
-                            {articles.filter(a => a.sentiment === 'Positive').length}
+                            {articles.filter(a => {
+                                const today = new Date()
+                                const articleDate = new Date(a.created_at)
+                                return articleDate.toDateString() === today.toDateString()
+                            }).length}
                         </div>
                         <div className="text-gray-400 text-sm flex items-center justify-center gap-1">
                             <Sparkles className="h-4 w-4" />
-                            ข่าวบวก
-                        </div>
-                    </div>
-
-                    <div className="glass-card bg-orange-500/10 border-orange-400/30 rounded-xl py-2 text-center neon-glow-hover">
-                        <div className="text-orange-300 text-3xl font-bold mb-2">
-                            {articles.filter(a => a.sentiment === 'Negative').length}
-                        </div>
-                        <div className="text-gray-400 text-sm flex items-center justify-center gap-1">
-                            <Zap className="h-4 w-4" />
-                            ข่าวลบ
+                            ข่าววันนี้
                         </div>
                     </div>
                 </div>
 
-                        {/* News Grid */}
-        {articlesLoading ? (
-          <TypewriterLoader isLoading={articlesLoading} />
-        ) : articles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {articles.map((article) => (
-              <NewsCard key={article.id} article={article} />
-            ))}
-          </div>
-        ) : (
-          <div className="glass-card neon-border rounded-xl p-12 text-center">
-            <div className="animate-pulse-neon mb-6">
-              <TrendingUp className="h-16 w-16 text-cyan-400 mx-auto" />
-            </div>
-            <h3 className="gradient-text text-2xl font-bold mb-4">
-              ไม่พบข่าว
-            </h3>
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              ยังไม่มีข่าวในระบบ กรุณาดึงข่าวจากแหล่งข่าวด้านบน
-              หรือปรับเปลี่ยนตัวกรองข่าว
-            </p>
-            <button
-              onClick={handleRefresh}
-              className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
-            >
-              <RefreshCw className="h-4 w-4" />
-              ลองรีเฟรชอีกครั้ง
-            </button>
-          </div>
-        )}
-
+                {/* News Grid */}
+                {articlesLoading ? (
+                    <TypewriterLoader isLoading={articlesLoading} />
+                ) : articles.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                        {articles.map((article) => (
+                            <NewsCard key={article.id} article={article} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="glass-card neon-border rounded-xl p-12 text-center">
+                        <div className="animate-pulse-neon mb-6">
+                            <TrendingUp className="h-16 w-16 text-cyan-400 mx-auto" />
+                        </div>
+                        <h3 className="gradient-text text-2xl font-bold mb-4">
+                            ไม่พบข่าว
+                        </h3>
+                        <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                            ยังไม่มีข่าวในระบบ กรุณาดึงข่าวจากแหล่งข่าวด้านบน
+                            หรือปรับเปลี่ยนตัวกรองข่าว
+                        </p>
+                        <button
+                            onClick={handleRefresh}
+                            className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
+                        >
+                            <RefreshCw className="h-4 w-4" />
+                            ลองรีเฟรชอีกครั้ง
+                        </button>
+                    </div>
+                )}
             </main>
-
         </div>
     )
 }

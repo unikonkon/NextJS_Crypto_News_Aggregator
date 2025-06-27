@@ -1,8 +1,8 @@
 import { Article } from '@/lib/supabase'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { ExternalLink, TrendingUp, Clock, User } from 'lucide-react'
-import { getRelativeTime, getSentimentColor, getTrendingScoreColor } from '@/lib/utils'
+import { ExternalLink, Clock, User } from 'lucide-react'
+import { getRelativeTime } from '@/lib/utils'
 
 interface ArticleCardProps {
   article: Article
@@ -19,7 +19,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <span>{getRelativeTime(article.published_at)}</span>
+            <span>{getRelativeTime(article.pub_date || article.created_at)}</span>
           </div>
         </div>
         
@@ -29,29 +29,28 @@ export default function ArticleCard({ article }: ArticleCardProps) {
       </CardHeader>
 
       <CardContent className="flex-1 pb-3">
-        {article.summary && (
+        {article.description && (
           <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
-            {article.summary}
+            {article.description}
           </p>
         )}
 
         <div className="flex flex-wrap gap-2">
-          {article.sentiment && (
+          {article.name_category && (
             <Badge 
               variant="outline" 
-              className={`${getSentimentColor(article.sentiment)} text-xs`}
+              className="text-xs"
             >
-              {article.sentiment}
+              {article.name_category}
             </Badge>
           )}
           
-          {article.trending_score !== null && (
+          {article.category && (
             <Badge 
               variant="outline" 
-              className={`${getTrendingScoreColor(article.trending_score)} text-xs`}
+              className="text-xs"
             >
-              <TrendingUp className="h-3 w-3 mr-1" />
-              {article.trending_score}/100
+              {article.category}
             </Badge>
           )}
         </div>

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { newsAggregator, NEWS_SOURCES } from '@/lib/rss-parser'
-import { geminiAnalyzer } from '@/lib/gemini'
+import { newsAggregator, NEWS_SOURCES, extractCryptoTags } from '@/lib/rss-parser'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -58,55 +57,41 @@ export async function GET(request: NextRequest) {
             continue
           }
 
-          // Clean content for analysis
+          // Clean content 
           const cleanContent = newsAggregator.cleanContent(
             article.content || article.description || ''
           )
 
-          // Analyze with Gemini (only if API key is available)
-          let analysis: {
-            summary: string;
-            sentiment: 'Positive' | 'Neutral' | 'Negative';
-            trending_score: number;
-          } = {
-            summary: article.description?.substring(0, 200) + '...' || 'No summary available',
-            sentiment: 'Neutral',
-            trending_score: 50
-          }
+          // Extract crypto tags from title
+          const cryptoTags = extractCryptoTags(article.title)
+          const nameCategory = cryptoTags.length > 0 ? cryptoTags.join(',') : null
 
-          if (process.env.GEMINI_API_KEY) {
-            try {
-              console.log(`Analyzing: ${article.title?.substring(0, 50)}...`)
-              analysis = await geminiAnalyzer.analyzeArticle(cleanContent)
-            } catch (error) {
-              console.error('Gemini analysis failed, using defaults:', error)
-            }
-          }
-
-          // Insert into database
+          // Insert into database with crypto tags
           const { error } = await supabaseAdmin
             .from('articles')
             .insert({
               title: article.title,
               url: article.link,
               content: cleanContent,
-              summary: analysis.summary,
-              sentiment: analysis.sentiment,
-              trending_score: analysis.trending_score,
+              description: article.description || null,
               source: source.name,
-              published_at: new Date(article.pubDate || Date.now()).toISOString()
+              pub_date: article.pubDate ? new Date(article.pubDate).toISOString() : null,
+              category: null, // Will be set by AI later if needed
+              name_category: nameCategory, // เก็บชื่อเหรียญคริปโต
+              creator: null // Can be extracted from RSS if available
             })
 
           if (error) {
             console.error('Error inserting article:', error)
           } else {
             sourceNew++
+            console.log(`Article saved with crypto tags: ${nameCategory || 'none'}`)
           }
 
           sourceProcessed++
 
           // Add small delay to avoid overwhelming the system
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise(resolve => setTimeout(resolve, 100))
         }
 
         totalProcessed += sourceProcessed

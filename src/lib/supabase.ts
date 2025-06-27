@@ -11,21 +11,51 @@ export interface Article {
   title: string
   url: string
   content: string
-  summary: string | null
-  sentiment: 'Positive' | 'Neutral' | 'Negative' | null
-  trending_score: number | null
+  description: string | null
   source: string
-  published_at: string
+  pub_date: string | null
+  category: string | null
+  name_category: string | null
+  creator: string | null
   created_at: string
+  updated_at: string
 }
 
 export interface ArticleInsert {
   title: string
   url: string
   content: string
+  description?: string
   source: string
-  published_at: string
-  summary?: string
+  pub_date?: string
+  category?: string
+  name_category?: string
+  creator?: string
+}
+
+export interface SummaryNew {
+  id: string
+  all_select: number
+  all_content: string
+  all_source: string
+  all_category: string | null
+  name_crypto: string | null
+  summary: string
+  source: string
+  sentiment: 'Positive' | 'Neutral' | 'Negative' | null
+  trending_score: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SummaryNewInsert {
+  all_select: number
+  all_content: string
+  all_source: string
+  all_category?: string
+  name_crypto?: string
+  summary: string
+  source: string
   sentiment?: 'Positive' | 'Neutral' | 'Negative'
   trending_score?: number
 } 
