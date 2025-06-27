@@ -5,6 +5,8 @@ import { Article } from '@/lib/supabase'
 import NewsCard from '@/components/NewsCard'
 import FeedList from '@/components/FeedList'
 import NeonHeader from '@/components/NeonHeader'
+import TypewriterLoader from '@/components/TypewriterLoader'
+import CyberLoader from '@/components/CyberLoader'
 import { Loader2, TrendingUp, Zap, BarChart3, Download, RefreshCw, Sparkles, Terminal, Wifi, Activity } from 'lucide-react'
 import { AuthData, getCurrentUser } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
@@ -43,6 +45,7 @@ const NEWS_SOURCES = [
 export default function Home() {
     const [articles, setArticles] = useState<Article[]>([])
     const [loading, setLoading] = useState(true)
+    const [articlesLoading, setArticlesLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [fetchingNews, setFetchingNews] = useState<string | null>(null)
     const [fetchResults, setFetchResults] = useState<FetchNewsResponse | null>(null)
@@ -70,7 +73,7 @@ export default function Home() {
     }, [user, loading, router])
 
     const fetchArticles = useCallback(async () => {
-        setLoading(true)
+        setArticlesLoading(true)
         setError(null)
 
         try {
@@ -95,7 +98,7 @@ export default function Home() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred')
         } finally {
-            setLoading(false)
+            setArticlesLoading(false)
         }
     }, [page, sentiment, source, sortBy, order, limit])
 
@@ -163,29 +166,23 @@ export default function Home() {
     }
 
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-                <div className="text-white">กำลังโหลด...</div>
-            </div>
-        )
-    }
-
     if (!user) {
         return null // ไม่ render อะไร รอ useEffect redirect
     }
 
-    if (loading && !fetchingNews) {
+    if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="glass-card neon-border rounded-xl p-8 text-center">
-                    <div className="animate-pulse-neon mb-4">
-                        <Loader2 className="h-12 w-12 animate-spin text-cyan-400 mx-auto" />
-                    </div>
-                    <h3 className="gradient-text text-xl font-semibold mb-2">กำลังโหลดข่าว...</h3>
-                    <p className="text-gray-400">รอสักครู่ เรากำลังดึงข่าวล่าสุดมาให้คุณ</p>
-                </div>
-            </div>
+            <CyberLoader 
+                title="กำลังโหลด..."
+                subtitle="รอสักครู่ เรากำลังตรวจสอบสิทธิ์การเข้าใช้งาน"
+                showProgress={true}
+                messages={[
+                    'เชื่อมต่อระบบรักษาความปลอดภัย...',
+                    'ตรวจสอบข้อมูลผู้ใช้งาน...',
+                    'โหลดข้อมูลส่วนบุคคล...',
+                    'เข้าสู่ระบบแดชบอร์ด...'
+                ]}
+            />
         )
     }
 
@@ -428,34 +425,36 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* News Grid */}
-                {articles.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                        {articles.map((article) => (
-                            <NewsCard key={article.id} article={article} />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="glass-card neon-border rounded-xl p-12 text-center">
-                        <div className="animate-pulse-neon mb-6">
-                            <TrendingUp className="h-16 w-16 text-cyan-400 mx-auto" />
-                        </div>
-                        <h3 className="gradient-text text-2xl font-bold mb-4">
-                            ไม่พบข่าว
-                        </h3>
-                        <p className="text-gray-400 mb-6 max-w-md mx-auto">
-                            ยังไม่มีข่าวในระบบ กรุณาดึงข่าวจากแหล่งข่าวด้านบน
-                            หรือปรับเปลี่ยนตัวกรองข่าว
-                        </p>
-                        <button
-                            onClick={handleRefresh}
-                            className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
-                        >
-                            <RefreshCw className="h-4 w-4" />
-                            ลองรีเฟรชอีกครั้ง
-                        </button>
-                    </div>
-                )}
+                        {/* News Grid */}
+        {articlesLoading ? (
+          <TypewriterLoader isLoading={articlesLoading} />
+        ) : articles.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {articles.map((article) => (
+              <NewsCard key={article.id} article={article} />
+            ))}
+          </div>
+        ) : (
+          <div className="glass-card neon-border rounded-xl p-12 text-center">
+            <div className="animate-pulse-neon mb-6">
+              <TrendingUp className="h-16 w-16 text-cyan-400 mx-auto" />
+            </div>
+            <h3 className="gradient-text text-2xl font-bold mb-4">
+              ไม่พบข่าว
+            </h3>
+            <p className="text-gray-400 mb-6 max-w-md mx-auto">
+              ยังไม่มีข่าวในระบบ กรุณาดึงข่าวจากแหล่งข่าวด้านบน
+              หรือปรับเปลี่ยนตัวกรองข่าว
+            </p>
+            <button
+              onClick={handleRefresh}
+              className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
+            >
+              <RefreshCw className="h-4 w-4" />
+              ลองรีเฟรชอีกครั้ง
+            </button>
+          </div>
+        )}
 
             </main>
 

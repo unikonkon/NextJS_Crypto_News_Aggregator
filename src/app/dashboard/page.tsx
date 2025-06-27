@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getCurrentUser, AuthData } from '@/lib/auth'
 import NeonHeader from '@/components/NeonHeader'
-
+import { Loader2 } from 'lucide-react'
+    
 export default function DashboardPage() {
     const [user, setUser] = useState<AuthData | null>(null)
     const [loading, setLoading] = useState(true)
@@ -30,7 +31,13 @@ export default function DashboardPage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-                <div className="text-white">กำลังโหลด...</div>
+                <div className="glass-card neon-border rounded-xl p-8 text-center">
+                    <div className="animate-pulse-neon mb-4">
+                        <Loader2 className="h-12 w-12 animate-spin text-cyan-400 mx-auto" />
+                    </div>
+                    <h3 className="gradient-text text-xl font-semibold mb-2">กำลังโหลด...</h3>
+                    <p className="text-gray-400">รอสักครู่ เรากำลังตรวจสอบสิทธิ์การเข้าใช้งาน</p>
+                </div>
             </div>
         )
     }
@@ -49,7 +56,7 @@ export default function DashboardPage() {
             <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-purple-900/20 via-transparent to-transparent pointer-events-none" />
 
             {/* Neon Header */}
-            <NeonHeader 
+            <NeonHeader
                 title="💸 Crypto News Dashboard"
                 subtitle={`ยินดีต้อนรับ, ${user.user.email}!`}
                 showStats={false}
@@ -117,9 +124,9 @@ export default function DashboardPage() {
                         </CardContent>
                     </Card>
                 </div>
-               
+
             </div>
-            
+
         </div>
     )
 } 
