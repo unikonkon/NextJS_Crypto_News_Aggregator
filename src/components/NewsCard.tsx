@@ -15,7 +15,7 @@ export default function NewsCard({ article }: NewsCardProps) {
   return (
     <div className="glass-card neon-glow-hover rounded-xl p-5 h-full flex flex-col group">
       {/* Header */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-3 pl-3">
         <div className="flex items-center gap-2 text-sm text-gray-400">
           <Building2 className="h-4 w-4 text-cyan-400" />
           <span className="neon-text text-xs font-medium">{article.source}</span>

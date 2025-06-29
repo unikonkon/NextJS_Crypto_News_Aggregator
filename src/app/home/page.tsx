@@ -7,7 +7,7 @@ import FeedList from '@/components/FeedList'
 import NeonHeader from '@/components/NeonHeader'
 import TypewriterLoader from '@/components/TypewriterLoader'
 import CyberLoader from '@/components/CyberLoader'
-import { Loader2, TrendingUp, Zap, BarChart3, Download, RefreshCw, Sparkles, Terminal, Wifi, Activity } from 'lucide-react'
+import { Loader2, TrendingUp, Zap, BarChart3, Download, RefreshCw, Sparkles, Terminal, Wifi, Activity, Brain, Cpu } from 'lucide-react'
 import { AuthData, getCurrentUser } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 
@@ -391,22 +391,71 @@ export default function Home() {
                     </div>
                 )}
 
-                {/* AI Processing Link */}
-                <div className="glass-card neon-border rounded-xl mb-8 p-6 text-center">
+                {/* AI Processing Links */}
+                <div className="glass-card neon-border rounded-xl mb-8 p-6">
                     <h3 className="gradient-text text-xl font-semibold mb-4 flex items-center justify-center gap-3">
                         <Sparkles className="h-6 w-6" />
                         AI News Analysis
                     </h3>
-                    <p className="text-gray-400 mb-4">
-                        ต้องการให้ AI วิเคราะห์ข่าว? ไปหน้าประมวลผล AI เพื่อเลือกข่าวและวิเคราะห์
+                    <p className="text-gray-400 mb-6 text-center">
+                        เลือกประเภทการวิเคราะห์ข่าวด้วย AI ที่ต้องการ
                     </p>
-                    <button
-                        onClick={() => router.push('/ai-analysis')}
-                        className="neon-button px-6 py-3 rounded-lg font-medium flex items-center gap-2 mx-auto"
-                    >
-                        <Sparkles className="h-4 w-4" />
-                        ไปหน้า AI Analysis
-                    </button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* AI Analysis - Combined Summary */}
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600 hover:border-purple-400 transition-colors">
+                            <div className="flex items-center gap-3 mb-3">
+                                <Brain className="h-6 w-6 text-purple-400" />
+                                <h4 className="text-lg font-semibold text-white">AI Analysis</h4>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                รวมข่าวหลายข่าวให้ AI วิเคราะห์และสรุปเป็นภาพรวม
+                            </p>
+                            <button
+                                onClick={() => router.push('/ai-analysis')}
+                                className="w-full bg-purple-500/20 hover:bg-purple-500/30 border border-purple-400 text-purple-300 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                            >
+                                <Sparkles className="h-4 w-4" />
+                                AI Analysis
+                            </button>
+                        </div>
+
+                        {/* AI News - Individual Analysis */}
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600 hover:border-cyan-400 transition-colors">
+                            <div className="flex items-center gap-3 mb-3">
+                                <Cpu className="h-6 w-6 text-cyan-400" />
+                                <h4 className="text-lg font-semibold text-white">AI News</h4>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                วิเคราะห์ข่าวแยกแต่ละข่าว พร้อม 5 รูปแบบการสรุป
+                            </p>
+                            <button
+                                onClick={() => router.push('/ai-news')}
+                                className="w-full neon-button px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2"
+                            >
+                                <Zap className="h-4 w-4" />
+                                AI News
+                            </button>
+                        </div>
+
+                        {/* AI Insights - Trading Analysis */}
+                        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-600 hover:border-orange-400 transition-colors">
+                            <div className="flex items-center gap-3 mb-3">
+                                <TrendingUp className="h-6 w-6 text-orange-400" />
+                                <h4 className="text-lg font-semibold text-white">AI Insights</h4>
+                            </div>
+                            <p className="text-gray-400 text-sm mb-4">
+                                สรุปผลการวิเคราะห์เพื่อการตัดสินใจซื้อขาย
+                            </p>
+                            <button
+                                onClick={() => router.push('/ai-insights')}
+                                className="w-full bg-orange-500/20 hover:bg-orange-500/30 border border-orange-400 text-orange-300 px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                            >
+                                <BarChart3 className="h-4 w-4" />
+                                AI Insights
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Simple Stats Dashboard */}
